@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="BMIBrief — a neutral, adults-only BMI screening calculator. No alarm colors, no judgments. BMI is a screening measure, not a diagnosis.">
+<title>BMIBrief — Neutral Adult BMI Calculator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23274b8f'/%3E%3Ctext x='32' y='43' font-family='system-ui,sans-serif' font-size='32' font-weight='700' fill='white' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#calculator">Skip to calculator</a>
+
+<header class="site-header no-print">
+  <div class="wrap header-inner">
+    <a class="brand" href="#top" aria-label="BMIBrief home">
+      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <rect width="64" height="64" rx="14" fill="#274b8f"/>
+        <text x="32" y="43" font-family="system-ui,sans-serif" font-size="32" font-weight="700" fill="#fff" text-anchor="middle">B</text>
+      </svg>
+      <span class="brand-name">BMIBrief</span>
+      <span class="brand-tag">a neutral take on BMI</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#calculator">Calculator</a>
+      <a href="#understanding">Reading your result</a>
+      <a href="#plans">Plans</a>
+      <a href="#privacy">Privacy</a>
+    </nav>
+    <p class="pro-badge" id="pro-badge" hidden>Pro preview · ad-free</p>
+  </div>
+</header>
+
+<main id="top" class="no-print">
+  <!-- ======================= ABOVE THE FOLD: CALCULATOR ======================= -->
+  <section class="hero" id="calculator" aria-labelledby="hero-title">
+    <div class="wrap">
+      <h1 id="hero-title">Adult BMI calculator</h1>
+      <p class="lede">
+        A quick screening snapshot using standard adult cut-offs. BMIBrief stays neutral on purpose:
+        no alarm colors, no good-versus-bad labels — just a number, a category, and its limits.
+      </p>
+
+      <div class="calc-grid">
+        <!-- Input form -->
+        <form id="calc-form" class="card form-card" novalidate>
+          <fieldset class="units-field">
+            <legend>Units</legend>
+            <div class="segmented" role="radiogroup" aria-label="Measurement units">
+              <label class="segment">
+                <input type="radio" name="units" id="u-metric" value="metric" checked>
+                <span>Metric <span class="seg-sub">kg · cm</span></span>
+              </label>
+              <label class="segment">
+                <input type="radio" name="units" id="u-imperial" value="imperial">
+                <span>US <span class="seg-sub">lb · ft/in</span></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="fields-row" id="metric-fields">
+            <div class="field">
+              <label for="h-cm">Height <span class="unit">cm</span></label>
+              <input type="number" id="h-cm" inputmode="decimal" min="90" max="272" step="0.1" placeholder="e.g. 172" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="w-kg">Weight <span class="unit">kg</span></label>
+              <input type="number" id="w-kg" inputmode="decimal" min="25" max="450" step="0.1" placeholder="e.g. 70" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="fields-row" id="imperial-fields" hidden>
+            <div class="field">
+              <label for="h-ft">Height</label>
+              <div class="paired">
+                <input type="number" id="h-ft" inputmode="numeric" min="3" max="8" step="1" placeholder="ft" aria-label="Height, feet" disabled>
+                <input type="number" id="h-in" inputmode="decimal" min="0" max="11" step="0.5" placeholder="in" aria-label="Height, inches" disabled>
+              </div>
+            </div>
+            <div class="field">
+              <label for="w-lb">Weight <span class="unit">lb</span></label>
+              <input type="number" id="w-lb" inputmode="decimal" min="55" max="1000" step="0.1" placeholder="e.g. 155" disabled autocomplete="off">
+            </div>
+          </div>
+
+          <div class="fields-row">
+            <div class="field">
+              <label for="age">Age <span class="unit">optional</span></label>
+              <input type="number" id="age" inputmode="numeric" min="0" max="120" step="1" placeholder="years" autocomplete="off">
+              <p class="hint" id="age-hint">Cut-offs apply to adults 18+. Enter an age under 18 and we'll route you to child &amp; teen guidance.</p>
+            </div>
+          </div>
+
+          <div id="form-errors" class="form-errors" role="alert" hidden tabindex="-1"></div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" id="calc-btn">Calculate BMI</button>
+            <button type="button" class="btn btn-ghost" id="reset-btn">Reset</button>
+          </div>
+
+          <p class="fine">For adults aged 18 and older. <a href="#children">Calculating for a child or teen (2–17)?</a></p>
+        </form>
+
+        <!-- Result panel -->
+        <aside class="card result-card" aria-labelledby="result-title">
+          <h2 id="result-title">Your result</h2>
+          <div id="result-live" aria-live="polite">
+            <div id="result-default">
+              <p class="bmi-value"><span id="r-bmi">—</span></p>
+              <p class="category-line">
+                <span class="cat-chip" id="r-cat">Enter your details</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="scale" aria-hidden="true">
+            <div class="scale-track">
+              <span class="seg s1"></span><span class="seg s2"></span><span class="seg s3"></span><span class="seg s4"></span>
+              <span class="marker" id="r-marker" hidden></span>
+            </div>
+            <div class="scale-ticks">
+              <span style="left:0%">14</span>
+              <span style="left:16.1%">18.5</span>
+              <span style="left:39.3%">25</span>
+              <span style="left:57.1%">30</span>
+              <span style="left:100%">42</span>
+            </div>
+          </div>
+
+          <p class="r-extra" id="r-extra" hidden></p>
+
+          <p class="screening-note">
+            <strong>BMI is a screening measure, not a diagnosis.</strong>
+            It cannot measure body fat or health directly — only a clinician can assess an individual.
+          </p>
+
+          <div class="mini-limits">
+            <h3>Key limitations</h3>
+            <ul>
+              <li>Can't tell muscle or bone from fat.</li>
+              <li>Says nothing about where fat is carried.</li>
+              <li>Cut-offs fit some bodies and ages less well.</li>
+            </ul>
+            <a href="#limitations">See the full list</a>
+          </div>
+
+          <div class="save-row" id="save-row" hidden>
+            <button type="button" class="btn btn-secondary" id="save-btn">Save to profile <span class="pro-pill">Pro</span></button>
+            <p class="fine">Saved readings stay in this browser only.</p>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Under-18 routing panel -->
+      <div class="card child-panel" id="child-panel" hidden tabindex="-1" aria-labelledby="child-title">
+        <h2 id="child-title">Adult cut-offs don't apply under 18</h2>
+        <p>
+          This entry is for someone under 18, so we haven't applied adult categories — they would be
+          misleading while growth is still in progress. For ages 2–17, BMI is interpreted with
+          <em>age- and sex-specific percentile charts</em> (BMI-for-age), best reviewed with a
+          pediatric clinician.
+        </p>
+        <p class="child-links">
+          <a href="https://www.cdc.gov/healthyweight/assessing/bmi/childrens_bmi/about_childrens_bmi.html" rel="noopener">CDC: about child &amp; teen BMI</a>
+          &nbsp;·&nbsp;
+          <a href="https://www.who.int/tools/child-growth-standards" rel="noopener">WHO: child growth standards</a>
+        </p>
+        <button type="button" class="btn btn-ghost" id="child-back">Calculate for an adult instead</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ad slot 1 (Free tier) -->
+  <div class="wrap ad-wrap no-print" aria-hidden="false">
+    <div class="ad-slot" role="complementary" aria-label="Advertisement placeholder">
+      <span class="ad-label">Advertisement</span>
+      <span class="ad-note">This space supports unlimited free use. <a href="#plans">Go ad-free with Pro.</a></span>
+    </div>
+  </div>
+
+  <!-- ======================= UNDERSTANDING ======================= -->
+  <section class="wrap section" id="understanding" aria-labelledby="und-title">
+    <h2 id="und-title">How to read your result</h2>
+    <div class="two-col">
+      <div>
+        <h3>A screening measure, by design</h3>
+        <p>
+          BMI divides weight by height squared (kg/m²). It was built to compare <em>populations</em>,
+          not to diagnose individuals. A result outside the reference range is a prompt for a fuller
+          conversation — not a verdict. Clinicians combine it with waist measurements, medical
+          history, lab results, and examination before saying anything about your health.
+        </p>
+        <p>
+          Equally, a result inside the reference range is not a clean bill of health. Treat the number
+          as one data point, and bring questions to a qualified professional.
+        </p>
+      </div>
+      <div>
+        <h3>WHO adult categories</h3>
+        <table class="cat-table">
+          <caption class="sr-only">WHO body mass index categories for adults</caption>
+          <thead><tr><th scope="col">BMI (kg/m²)</th><th scope="col">Category</th></tr></thead>
+          <tbody>
+            <tr><td>Below 18.5</td><td>Underweight</td></tr>
+            <tr><td>18.5 – 24.9</td><td>Healthy weight</td></tr>
+            <tr><td>25.0 – 29.9</td><td>Overweight</td></tr>
+            <tr><td>30.0 – 34.9</td><td>Obesity, class I</td></tr>
+            <tr><td>35.0 – 39.9</td><td>Obesity, class II</td></tr>
+            <tr><td>40.0 and above</td><td>Obesity, class III</td></tr>
+          </tbody>
+        </table>
+        <p class="fine">
+          Population-level screening labels from WHO — descriptive categories, not judgments about
+          any individual body.
+        </p>
+      </div>
+    </div>
+    <p class="review-stamp">
+      Evidence-based content. Last reviewed against WHO and CDC references on
+      <strong>26 September 2026</strong>. Next scheduled review: <strong>March 2027</strong>.
+      <a href="#sources">See sources</a>.
+    </p>
+  </section>
+
+  <!-- ======================= LIMITATIONS ======================= -->
+  <section class="band section" id="limitations" aria-labelledby="lim-title">
+    <div class="wrap">
+      <h2 id="lim-title">What BMI can't tell you</h2>
+      <ul class="limit-grid">
+        <li class="card"><h3>Composition</h3><p>BMI can't separate fat from muscle or bone, so muscular people can land in a higher category with low body fat, and others can sit in the reference range with high body fat.</p></li>
+        <li class="card"><h3>Distribution</h3><p>Where fat is carried matters for risk. Waist circumference adds context that a single BMI number cannot.</p></li>
+        <li class="card"><h3>Life stage</h3><p>Standard cut-offs are less informative during pregnancy, for many adults over 65, and for children and teens (who need BMI-for-age percentiles).</p></li>
+        <li class="card"><h3>Ancestry differences</h3><p>Health risk can begin at different BMI points across ethnic groups; some public-health bodies discuss lower action points for some populations. A clinician can interpret this for you.</p></li>
+        <li class="card"><h3>Individual variation</h3><p>Fitness, medications, conditions, disability, and history all change what a number means. That interpretation needs a person, not a formula.</p></li>
+        <li class="card"><h3>One moment in time</h3><p>A single reading is a snapshot. Trends — discussed with a professional — are more informative than any one result.</p></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ======================= PRO TOOLKIT ======================= -->
+  <section class="wrap section" id="pro-toolkit" aria-labelledby="toolkit-title">
+    <h2 id="toolkit-title">Pro toolkit <span class="pro-pill pill-large">Pro preview</span></h2>
+    <p id="toolkit-gate" class="gate-note">
+      These tools are part of Pro. <a href="#plans">Enable the free local preview</a> to try saved
+      readings, trends, printable summaries, profiles, reminders, and ad-free mode — all stored only
+      in this browser.
+    </p>
+
+    <fieldset id="toolkit-fields" class="toolkit-grid" disabled>
+      <legend class="sr-only">Pro tools</legend>
+
+      <div class="card">
+        <h3>Profiles</h3>
+        <div class="row-inline">
+          <label class="sr-only" for="profile-select">Active profile</label>
+          <select id="profile-select"></select>
+          <button type="button" class="btn btn-ghost" id="profile-rename">Rename</button>
+          <button type="button" class="btn btn-ghost danger" id="profile-delete">Delete profile</button>
+        </div>
+        <div class="row-inline">
+          <label class="sr-only" for="profile-name">New profile name</label>
+          <input type="text" id="profile-name" maxlength="40" placeholder="New profile name">
+          <button type="button" class="btn btn-secondary" id="profile-add">Add profile</button>
+        </div>
+        <p class="fine">Deleting a profile securely erases its readings from this browser.</p>
+      </div>
+
+      <div class="card">
+        <h3>Check-in reminders</h3>
+        <div class="row-inline">
+          <label for="reminder-select">Remind me every</label>
+          <select id="reminder-select">
+            <option value="0">Off</option>
+            <option value="7">1 week</option>
+            <option value="14">2 weeks</option>
+            <option value="30">1 month</option>
+            <option value="90">3 months</option>
+          </select>
+        </div>
+        <p class="fine" id="reminder-next">No reminder set.</p>
+        <div class="reminder-banner" id="reminder-banner" role="status" hidden>
+          <p>Your scheduled check-in is due. Take a fresh reading when you're ready.</p>
+          <button type="button" class="btn btn-ghost" id="reminder-reschedule">Done — schedule next</button>
+        </div>
+        <p class="fine">Reminders appear on this page while it's open. Email or push reminders would need an account in the full product.</p>
+      </div>
+
+      <div class="card span-2">
+        <h3>Trend chart</h3>
+        <svg id="trend-svg" viewBox="0 0 640 250" role="img" aria-labelledby="trend-desc" preserveAspectRatio="xMidYMid meet"></svg>
+        <p id="chart-empty" class="fine">No saved readings yet — calculate a BMI and press “Save to profile”.</p>
+        <p class="fine sr-only" id="trend-desc">Line chart of saved BMI readings over time, with the 18.5 to 25 reference band shaded. The history table below lists the same values.</p>
+      </div>
+
+      <div class="card span-2">
+        <h3>Saved readings</h3>
+        <table class="hist-table">
+          <caption class="sr-only">Saved BMI readings for the active profile</caption>
+          <thead><tr><th scope="col">Date</th><th scope="col">BMI</th><th scope="col">Category</th><th scope="col">Height</th><th scope="col">Weight</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+          <tbody id="history-body"></tbody>
+        </table>
+        <p class="fine" id="history-empty">Nothing saved yet.</p>
+        <div class="row-inline">
+          <button type="button" class="btn btn-secondary" id="print-btn">Print summary</button>
+          <button type="button" class="btn btn-ghost danger" id="history-clear">Securely erase all readings</button>
+        </div>
+        <p class="fine">The printable summary includes your latest result, trend, disclaimer, and content review date — without ads.</p>
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- ======================= PLANS ======================= -->
+  <section class="band section" id="plans" aria-labelledby="plans-title">
+    <div class="wrap">
+      <h2 id="plans-title">Plans</h2>
+      <p class="section-lede">Unlimited BMI calculations are free for everyone. Pro adds memory and context.</p>
+      <div class="plans-grid">
+        <article class="card plan" aria-labelledby="plan-free">
+          <h3 id="plan-free">Free</h3>
+          <p class="price"><span class="amount">$0</span><span class="per"> forever</span></p>
+          <ul>
+            <li>Unlimited BMI calculations</li>
+            <li>Metric and US customary units</li>
+            <li>Neutral categories &amp; limitations guidance</li>
+            <li>Child &amp; teen routing to professional guidance</li>
+            <li>Supported by non-intrusive ads</li>
+          </ul>
+          <p class="plan-status">You're using Free</p>
+        </article>
+        <article class="card plan plan-pro" aria-labelledby="plan-pro">
+          <h3 id="plan-pro">Pro</h3>
+          <p class="price"><span class="amount">$4.99</span><span class="per"> /month</span></p>
+          <ul>
+            <li>Saved readings per profile</li>
+            <li>Trend charts over time</li>
+            <li>Printable summaries for appointments</li>
+            <li>Profile management for the household</li>
+            <li>Check-in reminders</li>
+            <li>Ad-free mode</li>
+            <li>Secure deletion of every record</li>
+          </ul>
+          <div class="pro-toggle-row">
+            <label class="switch">
+              <input type="checkbox" id="pro-toggle">
+              <span class="slider" aria-hidden="true"></span>
+              <span class="switch-label">Try the local Pro preview</span>
+            </label>
+          </div>
+          <p class="fine">Demo note: no account, no payment collected. The preview enables every Pro feature locally in your browser.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PRIVACY ======================= -->
+  <section class="wrap section" id="privacy" aria-labelledby="priv-title">
+    <h2 id="priv-title">Privacy &amp; secure deletion</h2>
+    <div class="two-col">
+      <div>
+        <p>
+          BMIBrief calculates everything on your device. In this demo, Pro preview data — profiles,
+          readings, reminders — is stored only in this browser's local storage. Nothing is sent to a
+          server, and there are no analytics or trackers on this page.
+        </p>
+        <p>
+          When you delete a reading, a profile, or everything, the stored bytes are first overwritten
+          with random data and then removed (<em>overwrite-then-erase</em>). After that, the data is
+          not recoverable from this app.
+        </p>
+      </div>
+      <div class="card privacy-card">
+        <h3>Your controls</h3>
+        <ul>
+          <li>Erase individual readings from the history table</li>
+          <li>Erase a whole profile and its history</li>
+          <li>Erase everything BMIBrief has stored here</li>
+        </ul>
+        <button type="button" class="btn btn-secondary danger" id="delete-all">Securely delete all my data</button>
+        <p class="fine" id="delete-all-status" role="status"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= DISCLAIMER / SOURCES ======================= -->
+  <section class="band section" id="children" aria-labelledby="disc-title">
+    <div class="wrap">
+      <h2 id="disc-title">Disclaimer</h2>
+      <p>
+        BMIBrief is an educational screening aid for adults. It is not medical advice, not a
+        diagnostic tool, and not a medical device. BMI is a screening measure, not a diagnosis. Never
+        start, stop, or change any treatment, diet, or exercise program based on a number from this
+        page — talk with a qualified health professional who knows your history.
+      </p>
+      <p>
+        <strong>Children and teens (2–17):</strong> adult BMI categories do not apply. Please use
+        BMI-for-age percentile charts and consult a pediatric clinician. Helpful starting points:
+        <a href="https://www.cdc.gov/healthyweight/assessing/bmi/childrens_bmi/about_childrens_bmi.html" rel="noopener">CDC child &amp; teen BMI</a>
+        and the <a href="https://www.who.int/tools/child-growth-standards" rel="noopener">WHO child growth standards</a>.
+      </p>
+      <p>
+        <strong>If weight or eating is a source of distress for you</strong>, consider reaching out to a
+        health professional or an eating-disorder support service. Numbers on a page should never add
+        pressure to your day.
+      </p>
+
+      <h3 id="sources">Sources &amp; content review</h3>
+      <ul class="sources-list">
+        <li><a href="https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight" rel="noopener">WHO — Obesity and overweight (BMI classification)</a></li>
+        <li><a href="https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html" rel="noopener">CDC — About adult BMI</a></li>
+        <li><a href="https://www.cdc.gov/healthyweight/assessing/bmi/childrens_bmi/about_childrens_bmi.html" rel="noopener">CDC — About child &amp; teen BMI</a></li>
+        <li><a href="https://www.nhlbi.nih.gov/health/educational/lose_wt/BMI/bmicalc.htm" rel="noopener">NHLBI — Calculate your body mass index</a></li>
+      </ul>
+      <p class="review-stamp">
+        This page is reviewed against primary public-health references.
+        <strong>Last evidence-based content review: 26 September 2026.</strong>
+        Next scheduled review: <strong>March 2027</strong>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Ad slot 2 (Free tier) -->
+  <div class="wrap ad-wrap no-print">
+    <div class="ad-slot" role="complementary" aria-label="Advertisement placeholder">
+      <span class="ad-label">Advertisement</span>
+      <span class="ad-note">Ads keep the basic calculator free and unlimited. <a href="#plans">Prefer ad-free?</a></span>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer no-print">
+  <div class="wrap footer-inner">
+    <p><strong>BMIBrief</strong> · neutral BMI screening for adults · BMI is a screening measure, not a diagnosis.</p>
+    <p class="fine">Content reviewed 26 September 2026 · Next review March 2027 · © 2026 BMIBrief</p>
+  </div>
+</footer>
+
+<!-- Printable summary (shown only when printing) -->
+<section id="print-summary" aria-labelledby="ps-title">
+  <h1 id="ps-title">BMIBrief — BMI summary</h1>
+  <p id="ps-profile"></p>
+  <p id="ps-date"></p>
+  <p id="ps-latest"></p>
+  <table id="ps-table">
+    <caption>Recent readings</caption>
+    <thead><tr><th scope="col">Date</th><th scope="col">BMI</th><th scope="col">Category</th></tr></thead>
+    <tbody id="ps-body"></tbody>
+  </table>
+  <p class="ps-note">
+    BMI is a screening measure, not a diagnosis. This summary is for discussion with a qualified
+    health professional. Content reviewed against WHO/CDC references on 26 September 2026;
+    next review March 2027. Generated locally by BMIBrief — no data left this device.
+  </p>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>
